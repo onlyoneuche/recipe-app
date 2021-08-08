@@ -1,8 +1,5 @@
 from django.db import models
-
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db.models.aggregates import Max
-from django.forms.fields import EmailField
 
 class UserManager(BaseUserManager):
 
@@ -13,7 +10,16 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-        
+    
+    def create_superuser(self, email, password):
+        if None in (email, password):
+            raise ValueError("Please provide both email and password")
+        user = self.model(email=self.normalize_email(email))
+        user.set_password(password)
+        user.is_superuser = True
+        user.is_staff = True
+        user.save(using=self._db)
+        return user
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
